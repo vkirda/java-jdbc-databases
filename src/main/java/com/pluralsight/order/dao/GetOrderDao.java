@@ -31,12 +31,20 @@ public class GetOrderDao {
      * @return Object with the main information of an order
      */
     public OrderDto getOrderById(ParamsDto paramsDto) {
-        OrderDto orderDto = null;
+        OrderDto orderDto = new OrderDto();
 
-        try (Connection con = null;
+        try (Connection con = database.getConnection();
              PreparedStatement ps = createPreparedStatement(con, paramsDto.getOrderId());
              ResultSet rs = createResultSet(ps)
         ) {
+
+            while (rs.next()) {
+
+                orderDto.setOrderId(rs.getLong("order_id"));
+                orderDto.setCustomerId(rs.getLong("order_customer_id"));
+                orderDto.setDate(rs.getDate("order_date"));
+                orderDto.setStatus(rs.getString("order_status"));
+            }
 
         } catch (SQLException ex) {
             ExceptionHandler.handleException(ex);
@@ -54,7 +62,11 @@ public class GetOrderDao {
      */
     private PreparedStatement createPreparedStatement(Connection con, long orderId) throws SQLException {
 
-        return null;
+        PreparedStatement preparedStatement = con.prepareStatement(query);
+
+        preparedStatement.setLong(1, orderId);
+
+        return preparedStatement;
     }
 
     /**
@@ -64,6 +76,6 @@ public class GetOrderDao {
      * @throws SQLException In case of an error
      */
     private ResultSet createResultSet(PreparedStatement ps) throws SQLException {
-        return null;
+        return ps.executeQuery();
     }
 }
