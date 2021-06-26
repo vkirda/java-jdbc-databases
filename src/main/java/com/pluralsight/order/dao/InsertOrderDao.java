@@ -59,21 +59,28 @@ public class InsertOrderDao {
                             orderDetailDto.setOrderId(orderId);
 
                             try (PreparedStatement detailsPS =
-                                         createOrderDetailPreparedStatement(con, orderDetailDto)) {
+                                         createOrderDetailPreparedStatement(con, orderDetailDto)
+                            ) {
 
-                                detailsPS.executeUpdate();
+                                int num = detailsPS.executeUpdate();
 
-//                                ResultSet rs = detailsPS.getGeneratedKeys();
+                                if (num != 1) {
+                                    con.rollback();
+                                    orderId = -1;
+                                }
 
-
-
-                            }
+                            } /*catch (SQLException ex) {
+                                ExceptionHandler.handleException(ex);
+                            }*/
                         }
+
+                        con.commit();
 
                     }
                 }
             } catch(SQLException ex) {
 
+                con.rollback();
                 ExceptionHandler.handleException(ex);
             }
         } catch (SQLException ex) {
@@ -94,7 +101,7 @@ public class InsertOrderDao {
 
         PreparedStatement ps = con.prepareStatement(sqlOrder, PreparedStatement.RETURN_GENERATED_KEYS);
 
-        ps.setLong(1, orderDto.getOrderId());
+        ps.setLong(1, orderDto.getCustomerId());
         ps.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
         ps.setString(3, OrderStatus.CREATED.getStatus());
 
@@ -110,7 +117,7 @@ public class InsertOrderDao {
      */
     private PreparedStatement createOrderDetailPreparedStatement(Connection con, OrderDetailDto orderDetailDto) throws SQLException {
 
-        PreparedStatement ps = con.prepareStatement(sqlOrderDetail, PreparedStatement.RETURN_GENERATED_KEYS);
+        PreparedStatement ps = con.prepareStatement(sqlOrderDetail);
 
         ps.setLong(1, orderDetailDto.getOrderId());
         ps.setLong(2, orderDetailDto.getProductId());
