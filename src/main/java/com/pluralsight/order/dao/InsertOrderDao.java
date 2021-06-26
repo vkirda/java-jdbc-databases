@@ -68,10 +68,7 @@ public class InsertOrderDao {
                                     con.rollback();
                                     orderId = -1;
                                 }
-
-                            } /*catch (SQLException ex) {
-                                ExceptionHandler.handleException(ex);
-                            }*/
+                            }
                         }
 
                         con.commit();
